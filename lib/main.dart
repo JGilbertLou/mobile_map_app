@@ -8,42 +8,47 @@ import 'config.dart';
 import 'dart:math'  as Math;
 
 
-Future<void> main() async {
-  runApp(MyApp());
-}
-
-
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'EMaps',
-      home: MapRouteInit(),
-    );
-  }
-}
+// Future<void> main() async {
+//   runApp(MyApp());
+// }
+//
+//
+// class MyApp extends StatelessWidget {
+//   // This widget is the root of your application.
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'EMaps',
+//       home: MapRouteInit(),
+//     );
+//   }
+// }
 
 class MapRouteInit extends StatefulWidget {
+  double carAutonomy;
+
+  MapRouteInit({required this.carAutonomy});
+
   @override
-  State<MapRouteInit> createState() => MapRoute();
+  _MapRoute createState() => _MapRoute(carAutonomy);
 }
 
-class MapRoute extends State<MapRouteInit> {
+class _MapRoute extends State<MapRouteInit> {
+  double carAutonomy;
+
+  _MapRoute(this.carAutonomy);
+
   final Completer<GoogleMapController> _controller =
   Completer<GoogleMapController>();
   TextEditingController _searchOriginController = TextEditingController();
   TextEditingController _searchDestinationController = TextEditingController();
 
   Set<Marker> _markers = Set<Marker>();
-  Set<Polyline> _polylines = Set<Polyline>();
   static Polyline _polyline = const Polyline(
       polylineId: PolylineId('polylineId'),
       width: 2,
       color: Colors.blue,
   );
-
-  int _polylineCounter = 1;
 
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(40.453053, -3.688344),
@@ -55,66 +60,6 @@ class MapRoute extends State<MapRouteInit> {
     super.initState();
     _setLocation(LatLng(40.453053, -3.688344));
   }
-
-  void _setLocation(LatLng point) {
-    setState(() {
-      _markers.add(
-        Marker(
-            markerId: MarkerId('marker'),
-            position: point,
-        )
-      );
-    });
-  }
-
-  void _setPolyline(List<PointLatLng> points) async {
-    List<LatLng> polylineLatLng = points
-        .map((point) => LatLng(point.latitude, point.longitude))
-        .toList();
-    double carAutonomy = 200;
-    double needGas = 0.0;
-
-    List<LatLng> markerPositions = [];
-    markerPositions.add(polylineLatLng.first);
-
-    for (int i = 1; i < polylineLatLng.length; i++) {
-      LatLng currentLocation = polylineLatLng[i];
-      LatLng previousLocation = polylineLatLng[i - 1];
-      double segmentDistance = _calculateDistance(previousLocation, currentLocation);
-      needGas += segmentDistance;
-
-      if (needGas >= carAutonomy) {
-        LatLng nearestEStation = await Location().findNearestEStation(previousLocation, currentLocation);
-        if (nearestEStation != currentLocation) {
-          markerPositions.add(nearestEStation);
-          needGas = 0.0;
-        }
-      }
-    }
-
-    setState(() {
-      _polyline = Polyline(
-        polylineId: PolylineId("polylineId"),
-        width: 2,
-        color: Colors.blue,
-        points: polylineLatLng,
-      );
-
-      _markers.clear();
-      for (LatLng markerPosition in markerPositions) {
-        _markers.add(
-          Marker(
-            markerId: MarkerId(markerPosition.toString()),
-            position: markerPosition,
-            icon: BitmapDescriptor.defaultMarker,
-          ),
-        );
-      }
-    });
-  }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +104,6 @@ class MapRoute extends State<MapRouteInit> {
               child: GoogleMap(
                 mapType: MapType.normal,
                 markers: _markers,
-                // polylines: _polylines,
                 polylines: {
                   _polyline,
                 },
@@ -212,6 +156,61 @@ class MapRoute extends State<MapRouteInit> {
     final double distance = radiusOfEarth * c;
 
     return distance;
+  }
+
+  void _setLocation(LatLng point) {
+    setState(() {
+      _markers.add(
+          Marker(
+            markerId: MarkerId('marker'),
+            position: point,
+          )
+      );
+    });
+  }
+
+  void _setPolyline(List<PointLatLng> points) async {
+    List<LatLng> polylineLatLng = points
+        .map((point) => LatLng(point.latitude, point.longitude))
+        .toList();
+    double needGas = 0.0;
+
+    List<LatLng> markerPositions = [];
+    markerPositions.add(polylineLatLng.first);
+
+    for (int i = 1; i < polylineLatLng.length; i++) {
+      LatLng currentLocation = polylineLatLng[i];
+      LatLng previousLocation = polylineLatLng[i - 1];
+      double segmentDistance = _calculateDistance(previousLocation, currentLocation);
+      needGas += segmentDistance;
+
+      if (needGas >= carAutonomy) {
+        LatLng nearestEStation = await Location().findNearestEStation(previousLocation, currentLocation);
+        if (nearestEStation != currentLocation) {
+          markerPositions.add(nearestEStation);
+          needGas = 0.0;
+        }
+      }
+    }
+    setState(() {
+      _polyline = Polyline(
+        polylineId: PolylineId("polylineId"),
+        width: 2,
+        color: Colors.blue,
+        points: polylineLatLng,
+      );
+
+      _markers.clear();
+      for (LatLng markerPosition in markerPositions) {
+        _markers.add(
+          Marker(
+            markerId: MarkerId(markerPosition.toString()),
+            position: markerPosition,
+            icon: BitmapDescriptor.defaultMarker,
+          ),
+        );
+      }
+    });
   }
 
 }
