@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:untitled4/location.dart';
 import 'config.dart';
+import 'dart:math'  as Math;
 
 
 Future<void> main() async {
@@ -65,26 +66,55 @@ class MapRoute extends State<MapRouteInit> {
       );
     });
   }
-  
-  void _setPolyline(List<PointLatLng> points) {
+
+  void _setPolyline(List<PointLatLng> points) async {
+    List<LatLng> polylineLatLng = points
+        .map((point) => LatLng(point.latitude, point.longitude))
+        .toList();
+    double carAutonomy = 200;
+    double needGas = 0.0;
+
+    List<LatLng> markerPositions = [];
+    markerPositions.add(polylineLatLng.first);
+
+    for (int i = 1; i < polylineLatLng.length; i++) {
+      LatLng currentLocation = polylineLatLng[i];
+      LatLng previousLocation = polylineLatLng[i - 1];
+      double segmentDistance = _calculateDistance(previousLocation, currentLocation);
+      needGas += segmentDistance;
+
+      if (needGas >= carAutonomy) {
+        LatLng nearestEStation = await Location().findNearestEStation(previousLocation, currentLocation);
+        if (nearestEStation != currentLocation) {
+          markerPositions.add(nearestEStation);
+          needGas = 0.0;
+        }
+      }
+    }
+
     setState(() {
-      final String polylineId = 'polyline_$_polylineCounter';
-      _polylineCounter++;
-      _polyline =
-      // _polylines.add(
-        Polyline(
-            polylineId: PolylineId(polylineId),
-            width: 2,
-            color: Colors.blue,
-            points: points.
-              map(
-                (point) => LatLng(point.latitude, point.longitude),
-            )
-            .toList(),
-        // )
+      _polyline = Polyline(
+        polylineId: PolylineId("polylineId"),
+        width: 2,
+        color: Colors.blue,
+        points: polylineLatLng,
       );
+
+      _markers.clear();
+      for (LatLng markerPosition in markerPositions) {
+        _markers.add(
+          Marker(
+            markerId: MarkerId(markerPosition.toString()),
+            position: markerPosition,
+            icon: BitmapDescriptor.defaultMarker,
+          ),
+        );
+      }
     });
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -162,5 +192,27 @@ class MapRoute extends State<MapRouteInit> {
     );
     _setLocation(LatLng(lat, lng));
   }
+
+  double _calculateDistance(LatLng subRouteOrigin, LatLng subRouteDestination) {
+    final int radiusOfEarth = 6371;
+
+    final double latOrigin = subRouteOrigin.latitude * (3.14159265359 / 180);
+    final double lonOrigin = subRouteOrigin.longitude * (3.14159265359 / 180);
+
+    final double latDestination = subRouteDestination.latitude * (3.14159265359 / 180);
+    final double lonDestination = subRouteDestination.longitude * (3.14159265359 / 180);
+
+    final double latDiff = latDestination - latOrigin;
+    final double lonDiff = lonDestination - lonOrigin;
+
+    final double a = (Math.sin(latDiff / 2) * Math.sin(latDiff / 2)) +
+        (Math.cos(latOrigin) * Math.cos(latDestination) * Math.sin(lonDiff / 2) * Math.sin(lonDiff / 2));
+    final double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    final double distance = radiusOfEarth * c;
+
+    return distance;
+  }
+
 }
 
