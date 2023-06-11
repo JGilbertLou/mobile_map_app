@@ -44,39 +44,39 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyB4SzRM3Mkk1bldk6rr73j8RCUnry-FfMA',
-    appId: '1:928524452734:web:a0d5ca6cb69c95c371292f',
-    messagingSenderId: '928524452734',
-    projectId: 'wired-maps-app2',
-    authDomain: 'wired-maps-app2.firebaseapp.com',
-    storageBucket: 'wired-maps-app2.appspot.com',
+    apiKey: 'AIzaSyCyrRMjFSjb21ZuTr3xuJmCkfPZz0Jqopo',
+    appId: '1:793456833549:web:4a8f4377e609382fc21144',
+    messagingSenderId: '793456833549',
+    projectId: 'wire-maps',
+    authDomain: 'wire-maps.firebaseapp.com',
+    storageBucket: 'wire-maps.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAWmKv-LBeavvZmO31fTs-ELpeASRZsmnQ',
-    appId: '1:928524452734:android:58f0e37e81945fce71292f',
-    messagingSenderId: '928524452734',
-    projectId: 'wired-maps-app2',
-    storageBucket: 'wired-maps-app2.appspot.com',
+    apiKey: 'AIzaSyADKRPzcn0BMzH4_QI7GN0Sd2V1I28nFpk',
+    appId: '1:793456833549:android:23173a9f7bf989e4c21144',
+    messagingSenderId: '793456833549',
+    projectId: 'wire-maps',
+    storageBucket: 'wire-maps.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBCsrc7zCkSOx1J_oOde4K6_mTA7xD1qjU',
-    appId: '1:928524452734:ios:916226a5f9f377ce71292f',
-    messagingSenderId: '928524452734',
-    projectId: 'wired-maps-app2',
-    storageBucket: 'wired-maps-app2.appspot.com',
-    iosClientId: '928524452734-0eqsalg26lpphv25e66mk6grf05es69p.apps.googleusercontent.com',
+    apiKey: 'AIzaSyBhFrI6WUYcg2CX_QTzXvE-SfnZcIk1EtY',
+    appId: '1:793456833549:ios:bd4e70dec607331ec21144',
+    messagingSenderId: '793456833549',
+    projectId: 'wire-maps',
+    storageBucket: 'wire-maps.appspot.com',
+    iosClientId: '793456833549-452c67g4vovrgg2gtooneislqh9jht3a.apps.googleusercontent.com',
     iosBundleId: 'com.example.untitled4',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBCsrc7zCkSOx1J_oOde4K6_mTA7xD1qjU',
-    appId: '1:928524452734:ios:916226a5f9f377ce71292f',
-    messagingSenderId: '928524452734',
-    projectId: 'wired-maps-app2',
-    storageBucket: 'wired-maps-app2.appspot.com',
-    iosClientId: '928524452734-0eqsalg26lpphv25e66mk6grf05es69p.apps.googleusercontent.com',
+    apiKey: 'AIzaSyBhFrI6WUYcg2CX_QTzXvE-SfnZcIk1EtY',
+    appId: '1:793456833549:ios:bd4e70dec607331ec21144',
+    messagingSenderId: '793456833549',
+    projectId: 'wire-maps',
+    storageBucket: 'wire-maps.appspot.com',
+    iosClientId: '793456833549-452c67g4vovrgg2gtooneislqh9jht3a.apps.googleusercontent.com',
     iosBundleId: 'com.example.untitled4',
   );
 }
