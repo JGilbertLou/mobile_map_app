@@ -40,6 +40,10 @@ dependencies:
   google_maps_flutter: ^2.2.8
   http: ^0.13.4
   flutter_polyline_points: ^1.0.0
+  firebase_core: ^2.13.1
+  firebase_auth: ^4.6.2
+  email_validator: ^2.1.17
+  google_fonts: ^4.0.4
 
 dev_dependencies:
   flutter_test:
@@ -57,8 +61,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-  assets:
-    - Config/config.json
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -68,6 +70,20 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+
+  assets:
+    - assets/images/WiredMaps_logo.png
+    - assets/images/profilePicture.png
+    - assets/images/Chevy Bolt EVEUV.png
+    - assets/images/Ford F-150 LightningRivian R1T.png
+    - assets/images/Ford Mustang Mach-E.png
+    - assets/images/Hyundai IONIQ 5.png
+    - assets/images/Kia EV6.png
+    - assets/images/Tesla Model S.png
+    - assets/images/Tesla Model Y.png
+    - assets/images/Tesla Model X.png
+    - assets/images/Tesla Model 3.png
+    - assets/images/Volkswagen ID.4.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
