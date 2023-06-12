@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled4/homeScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 import '../main.dart';
 import '../utils.dart';
@@ -15,7 +18,7 @@ class _CarModelScreen extends State<CarModelScreen> {
     double baseWidth = 360;
     double fem = MediaQuery.of(context).size.width / baseWidth;
     double ffem = fem * 0.97;
-    List<int> electricVehicleRanges = [
+    List<double> electricVehicleRanges = [
       417,
       376,
       402,
@@ -96,7 +99,9 @@ class _CarModelScreen extends State<CarModelScreen> {
                                 borderRadius: BorderRadius.circular(25 * fem),
                                 child: GestureDetector(
                                   onTap: () {
-                                    print(electricVehicleRanges[0]);
+                                    getUserUID();
+                                    _goToHomePage(electricVehicleRanges[0]);
+
                                   },
                                 child: Image.asset(
                                   'assets/images/Chevy Bolt EVEUV.png',
@@ -118,7 +123,7 @@ class _CarModelScreen extends State<CarModelScreen> {
                                 borderRadius: BorderRadius.circular(25 * fem),
                                 child: GestureDetector(
                                   onTap: () {
-                                    print(electricVehicleRanges[1]);
+                                    _goToHomePage(electricVehicleRanges[1]);
                                   },
                                 child: Image.asset(
                                   'assets/images/Ford F-150 LightningRivian R1T.png',
@@ -246,7 +251,7 @@ class _CarModelScreen extends State<CarModelScreen> {
                                                 BorderRadius.circular(25 * fem),
                                             child: GestureDetector(
                                               onTap: () {
-                                                print(electricVehicleRanges[2]);
+                                                _goToHomePage(electricVehicleRanges[2]);
                                               },
                                             child: Image.asset(
                                               'assets/images/Ford Mustang Mach-E.png',
@@ -319,7 +324,7 @@ class _CarModelScreen extends State<CarModelScreen> {
                                                 BorderRadius.circular(25 * fem),
                                             child: GestureDetector(
                                               onTap: () {
-                                                print(electricVehicleRanges[3]);
+                                                _goToHomePage(electricVehicleRanges[3]);
                                               },
                                             child: Image.asset(
                                               'assets/images/Hyundai IONIQ 5.png',
@@ -405,7 +410,7 @@ class _CarModelScreen extends State<CarModelScreen> {
                                                 BorderRadius.circular(25 * fem),
                                             child: GestureDetector(
                                               onTap: () {
-                                                print(electricVehicleRanges[4]);
+                                                _goToHomePage(electricVehicleRanges[4]);
                                               },
                                             child: Image.asset(
                                               'assets/images/Kia EV6.png',
@@ -478,7 +483,7 @@ class _CarModelScreen extends State<CarModelScreen> {
                                                 BorderRadius.circular(25 * fem),
                                             child: GestureDetector(
                                               onTap: () {
-                                                print(electricVehicleRanges[5]);
+                                                _goToHomePage(electricVehicleRanges[5]);
                                               },
                                             child: Image.asset(
                                               'assets/images/Tesla Model 3.png',
@@ -564,7 +569,7 @@ class _CarModelScreen extends State<CarModelScreen> {
                                                 BorderRadius.circular(25 * fem),
                                             child: GestureDetector(
                                               onTap: () {
-                                                print(electricVehicleRanges[6]);
+                                                _goToHomePage(electricVehicleRanges[6]);
                                               },
                                             child: Image.asset(
                                               'assets/images/Tesla Model S.png',
@@ -637,7 +642,7 @@ class _CarModelScreen extends State<CarModelScreen> {
                                                 BorderRadius.circular(25 * fem),
                                             child: GestureDetector(
                                               onTap: () {
-                                                print(electricVehicleRanges[7]);
+                                                _goToHomePage(electricVehicleRanges[7]);
                                               },
                                               child: Image.asset(
                                                 'assets/images/Tesla Model Y.png',
@@ -850,5 +855,23 @@ class _CarModelScreen extends State<CarModelScreen> {
         ),
       ),
     );
+  }
+
+  void _goToHomePage(double carAutonomy) {
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Homepage(carAutonomy: carAutonomy)));
+  }
+
+  void getUserUID() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    if (user != null) {
+      String uid = user.uid;
+      print('User UUID: $uid');
+    } else {
+      print('User is not authenticated.');
+    }
   }
 }

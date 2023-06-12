@@ -1,34 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:untitled4/main.dart';
+import 'package:untitled4/screens/user.dart';
 import 'package:untitled4/trip.dart';
 import 'package:untitled4/tripsContainer.dart';
 
+import 'map.dart';
+
 // void homeScreen() => runApp(MyApp());
-
-Future<void> main() async {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget{
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "homepage",
-      theme: ThemeData(
-        primarySwatch: Colors.lightBlue,
-      ),
-      home: Homepage(),
-    );
-  }
-}
+//
+// Future<void> main() async {
+//   runApp(MyApp());
+// }
+//
+// class MyApp extends StatelessWidget{
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: "homepage",
+//       theme: ThemeData(
+//         primarySwatch: Colors.lightBlue,
+//       ),
+//       home: Homepage(),
+//     );
+//   }
+// }
 
 
 class Homepage extends StatefulWidget {
+  double carAutonomy;
+  Homepage({required this.carAutonomy});
   @override
-  _HomepageState createState() => _HomepageState();
+  HomepageState createState() => HomepageState(carAutonomy);
 }
 
-class _HomepageState extends State<Homepage> {
+class HomepageState extends State<Homepage> {
+  double carAutonomy;
+  HomepageState(this.carAutonomy);
+
   final List<Trip> _trips = [
     Trip('Barcelona', 'Madrid', '40kW/h', '2:30'),
     Trip('Milan', 'Venice', '40kW/h', '2:30'),
@@ -36,19 +44,22 @@ class _HomepageState extends State<Homepage> {
     Trip('Washington DC', 'Houston', '40kW/h', '2:30'),
     Trip('Lyon', 'Oslo', '40kW/h', '2:30'),
     Trip('Lyon', 'Oslo', '40kW/h', '2:30'),
+    Trip('Lyon', 'Oslo', '40kW/h', '2:30'),
+    Trip('Lyon', 'Oslo', '40kW/h', '2:30'),
+    Trip('Lyon', 'Oslo', '40kW/h', '2:30'),
   ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(145.0),
+        preferredSize: const Size.fromHeight(149.0),
         child: ClipRRect(
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(45.0),
           ),
           child: AppBar(
             flexibleSpace: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Color(0xFFFF722D),
               ),
               child: Padding(
@@ -59,12 +70,13 @@ class _HomepageState extends State<Homepage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                            children: const [
                               Text(
-                                'Hello,',
+                                'Hello there,',
                                 style: TextStyle(
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.bold,
@@ -81,20 +93,67 @@ class _HomepageState extends State<Homepage> {
                               ),
                             ],
                           ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 24.0),
+                            child: ClipOval(
+                              child: Container(
+                                width: 40, // Set the desired button width
+                                height: 40, // Set the desired button height
+                                color: Colors.white, // Set the desired button color
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.person,
+                                    size: 24, // Set the desired icon size
+                                    color: Colors.black, // Set the desired icon color
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context).push(MaterialPageRoute(
+                                        builder: (context) => UserScreen(),
+                                    ));
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+
                         ],
                       ),
-                      SizedBox(height: 8.0),
-                      TextFormField(
-                        textCapitalization: TextCapitalization.words,
-                        decoration: InputDecoration(
-                          hintText: 'Enter origin',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                            borderSide: BorderSide.none,
+                      const SizedBox(height: 8.0),
+                      Container(
+                        width: double.infinity,
+                        height: 58,
+                        child:
+                          OutlinedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => MapRouteInit(carAutonomy: carAutonomy),
+                              ));
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                              ),
+                              textStyle: MaterialStateProperty.all<TextStyle>(
+                                TextStyle(fontSize: 16.0), // Adjust the font size as desired
+                              ),
+                              foregroundColor: MaterialStateProperty.all<Color>(Color(0xFF777777)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Enter origin',
+                                  style: TextStyle(
+                                    color: Colors.grey[700], // Set text color to gray
+                                    fontSize: 16.0, // Set text size
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                       ),
                     ],
                   ),

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../utils.dart';
+import 'handle.dart';
 
 class UserScreen extends StatefulWidget {
   @override
@@ -79,7 +80,10 @@ class _UserScreen extends State<UserScreen> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => FirebaseAuth.instance.signOut(),
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => Handler()));
+                  },
                   child: Container(
                   width: double.infinity,
                   height: 52 * fem,
