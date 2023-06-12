@@ -44,6 +44,7 @@ dependencies:
   firebase_auth: ^4.6.2
   email_validator: ^2.1.17
   google_fonts: ^4.0.4
+  cloud_firestore: ^4.8.0
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +73,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
 
   assets:
+    - Config/config.json
     - assets/images/WiredMaps_logo.png
     - assets/images/profilePicture.png
     - assets/images/Chevy Bolt EVEUV.png

@@ -99,7 +99,6 @@ class _CarModelScreen extends State<CarModelScreen> {
                                 borderRadius: BorderRadius.circular(25 * fem),
                                 child: GestureDetector(
                                   onTap: () {
-                                    getUserUID();
                                     _goToHomePage(electricVehicleRanges[0]);
 
                                   },
@@ -861,17 +860,5 @@ class _CarModelScreen extends State<CarModelScreen> {
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Homepage(carAutonomy: carAutonomy)));
-  }
-
-  void getUserUID() async {
-    FirebaseAuth auth = FirebaseAuth.instance;
-    User? user = auth.currentUser;
-
-    if (user != null) {
-      String uid = user.uid;
-      print('User UUID: $uid');
-    } else {
-      print('User is not authenticated.');
-    }
   }
 }

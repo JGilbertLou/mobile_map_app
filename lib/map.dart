@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'dart:async';
@@ -19,29 +20,46 @@ import 'dart:math'  as Math;
 //   Widget build(BuildContext context) {
 //     return MaterialApp(
 //       title: 'EMaps',
-//       home: MapRouteInit(),
+//       home: MapRouteInit(carAutonomy: 200,),
 //     );
 //   }
 // }
 
 class MapRouteInit extends StatefulWidget {
   double carAutonomy;
+  String? origin;
+  String? destination;
+  String? tripUIID;
 
-  MapRouteInit({required this.carAutonomy});
+  MapRouteInit({
+    required this.carAutonomy,
+    this.origin,
+    this.destination,
+    this.tripUIID
+  });
 
   @override
-  _MapRoute createState() => _MapRoute(carAutonomy);
+  _MapRoute createState() => _MapRoute(carAutonomy, origin, destination, tripUIID);
 }
 
 class _MapRoute extends State<MapRouteInit> {
+  bool isMinus = false;
   double carAutonomy;
+  String? origin;
+  String? destination;
+  String? tripUIID;
 
-  _MapRoute(this.carAutonomy);
+  _MapRoute(
+      this.carAutonomy,
+      this.origin,
+      this.destination,
+      this.tripUIID
+  );
 
   final Completer<GoogleMapController> _controller =
   Completer<GoogleMapController>();
-  TextEditingController _searchOriginController = TextEditingController();
-  TextEditingController _searchDestinationController = TextEditingController();
+  TextEditingController? _searchOriginController;
+  TextEditingController? _searchDestinationController;
 
   Set<Marker> _markers = Set<Marker>();
   static Polyline _polyline = const Polyline(
@@ -58,48 +76,152 @@ class _MapRoute extends State<MapRouteInit> {
   @override
   void initState() {
     super.initState();
-    _setLocation(LatLng(40.453053, -3.688344));
+    if (tripUIID == null) {
+      _searchOriginController = TextEditingController();
+      _searchDestinationController = TextEditingController();
+      _setLocation(LatLng(40.453053, -3.688344));
+    } else {
+      isMinus = true;
+      _handleDirections(widget.origin!, widget.destination!);
+    }
+
+
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('EMaps'),
+        appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(132.0),
+            child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(30.0),
+              bottomRight: Radius.circular(30.0),
+            ),
+            child: AppBar(
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xFF0C747E),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 30.0), // Add top padding here
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 45.0),
+                          child:
+                            Container (
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(40.0),
+                                color: Colors.white,
+                              ),
+                              child: TextFormField (
+                                controller: _searchOriginController,
+                                textCapitalization: TextCapitalization.words,
+                                enabled: origin == null,
+                                initialValue: origin,
+                                decoration: const InputDecoration (
+                                  hintText: 'Enter origin',
+                                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+                                  border: InputBorder.none,
+                                ),
+                                readOnly: origin != null,
+                              ),
+                            ),
+                        ),
+                        const SizedBox(height: 12.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(40.0),
+                                  color: Colors.white,
+                                ),
+                                child: TextFormField(
+                                  controller: _searchDestinationController,
+                                  textCapitalization: TextCapitalization.words,
+                                  enabled: destination == null,
+                                  initialValue: destination,
+                                  decoration: const InputDecoration(
+                                    hintText: 'Enter destination',
+                                    contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+                                    border: InputBorder.none,
+                                  ),
+                                  readOnly: destination != null,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8.0),
+                            // ClipOval(
+                            //   child: Container(
+                            //     width: 46, // Set the desired button width
+                            //     height: 46, // Set the desired button height
+                            //     color: Color(0xFFFF722D), // Set the desired button color
+                            //     child:
+                            IconButton(
+                              icon: const Icon(
+                                Icons.search,
+                                size: 30,
+                                color: Colors.white,
+                              ),
+                              onPressed: () async {
+                                if (_searchOriginController?.text != null && _searchDestinationController?.text != null) {
+                                  var directions = await Location().getDirection(_searchOriginController?.text, _searchDestinationController?.text);
+                                  _changeCameraPosition(directions['start_location']['lat'], directions['start_location']['lng'], directions['northeast'], directions['southwest']);
+                                  _setPolyline(directions['polyline_decoded']);
+                                }
+                              },
+                            ),
+                            //   ),
+                            // ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              if (isMinus) {
+                // Button is currently in minus state
+                tripUIID = null;
+              } else {
+
+                FirebaseAuth auth = FirebaseAuth.instance;
+                User? user = auth.currentUser;
+
+                if (user != null) {
+                  String uid = user.uid;
+                  print('User UUID: $uid');
+                } else {
+                  print('User is not authenticated.');
+                }
+
+
+
+
+                // Button is currently in plus state
+                tripUIID = 'hola'; // Replace with your logic
+              }
+              isMinus = !isMinus; // Toggle the state
+            });
+          },
+          child: Icon(
+            isMinus ? Icons.remove : Icons.add, // Use the correct icons
+          ),
+          backgroundColor: Color(0xFFFF722D),
         ),
         body: Column (
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child:
-                  Column(
-                    children: [
-                      TextFormField(
-                        controller: _searchOriginController,
-                        textCapitalization: TextCapitalization.words,
-                        decoration: InputDecoration(hintText: ' Origin'),
-                        onChanged: (value) {},
-
-                      ),
-                      TextFormField(
-                        controller: _searchDestinationController,
-                        textCapitalization: TextCapitalization.words,
-                        decoration: InputDecoration(hintText: ' Destination'),
-                        onChanged: (value) {},
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                    onPressed: () async {
-                      var directions = await Location().getDirection(_searchOriginController.text, _searchDestinationController.text);
-                      _changeCameraPosition(directions['start_location']['lat'], directions['start_location']['lng'], directions['northeast'], directions['southwest']);
-                      _setPolyline(directions['polyline_decoded']);
-                    },
-                    icon: Icon(Icons.search))
-              ],
-            ),
             Expanded(
               child: GoogleMap(
                 mapType: MapType.normal,
@@ -211,6 +333,17 @@ class _MapRoute extends State<MapRouteInit> {
         );
       }
     });
+  }
+
+  Future<void> _handleDirections(String origin, String destination) async {
+    var directions = await Location().getDirection(origin, destination);
+    _changeCameraPosition(
+      directions['start_location']['lat'],
+      directions['start_location']['lng'],
+      directions['northeast'],
+      directions['southwest'],
+    );
+    _setPolyline(directions['polyline_decoded']);
   }
 
 }

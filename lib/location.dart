@@ -28,7 +28,7 @@ class Location {
   }
 
 
-  Future<Map<String, dynamic>> getDirection(String origin, String destination) async {
+  Future<Map<String, dynamic>> getDirection(String? origin, String? destination) async {
     final String apiKey = await JsonReader.readValueFromJson();
     final String apiUrl = "https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&key=$apiKey";
     var response = await http.get(Uri.parse(apiUrl));

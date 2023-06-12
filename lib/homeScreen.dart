@@ -55,7 +55,7 @@ class HomepageState extends State<Homepage> {
         preferredSize: const Size.fromHeight(149.0),
         child: ClipRRect(
           borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(45.0),
+            bottomLeft: Radius.circular(30.0),
           ),
           child: AppBar(
             flexibleSpace: Container(
@@ -115,7 +115,6 @@ class HomepageState extends State<Homepage> {
                               ),
                             ),
                           ),
-
                         ],
                       ),
                       const SizedBox(height: 8.0),
@@ -126,7 +125,7 @@ class HomepageState extends State<Homepage> {
                           OutlinedButton(
                             onPressed: () {
                               Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => MapRouteInit(carAutonomy: carAutonomy),
+                                builder: (context) => MapRouteInit(carAutonomy: carAutonomy, origin: "barcelona", destination: 'milan', tripUIID: '2',),
                               ));
                             },
                             style: ButtonStyle(
