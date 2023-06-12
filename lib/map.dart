@@ -1,29 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'dart:async';
-import 'dart:io';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:untitled4/firebase.dart';
 import 'package:untitled4/location.dart';
-import 'config.dart';
-import 'dart:math'  as Math;
-
-
-// Future<void> main() async {
-//   runApp(MyApp());
-// }
-//
-//
-// class MyApp extends StatelessWidget {
-//   // This widget is the root of your application.
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'EMaps',
-//       home: MapRouteInit(carAutonomy: 200,),
-//     );
-//   }
-// }
+import 'package:untitled4/trip.dart';
+import 'dart:math' as Math;
 
 class MapRouteInit extends StatefulWidget {
   double carAutonomy;
@@ -43,7 +25,6 @@ class MapRouteInit extends StatefulWidget {
 }
 
 class _MapRoute extends State<MapRouteInit> {
-  bool isMinus = false;
   double carAutonomy;
   String? origin;
   String? destination;
@@ -58,8 +39,8 @@ class _MapRoute extends State<MapRouteInit> {
 
   final Completer<GoogleMapController> _controller =
   Completer<GoogleMapController>();
-  TextEditingController? _searchOriginController;
-  TextEditingController? _searchDestinationController;
+  TextEditingController _searchOriginController = TextEditingController();
+  TextEditingController _searchDestinationController = TextEditingController();
 
   Set<Marker> _markers = Set<Marker>();
   static Polyline _polyline = const Polyline(
@@ -77,15 +58,12 @@ class _MapRoute extends State<MapRouteInit> {
   void initState() {
     super.initState();
     if (tripUIID == null) {
-      _searchOriginController = TextEditingController();
-      _searchDestinationController = TextEditingController();
       _setLocation(LatLng(40.453053, -3.688344));
     } else {
-      isMinus = true;
+      _searchOriginController.text = origin!;
+      _searchDestinationController.text = destination!;
       _handleDirections(widget.origin!, widget.destination!);
     }
-
-
   }
 
   @override
@@ -121,14 +99,11 @@ class _MapRoute extends State<MapRouteInit> {
                               child: TextFormField (
                                 controller: _searchOriginController,
                                 textCapitalization: TextCapitalization.words,
-                                enabled: origin == null,
-                                initialValue: origin,
                                 decoration: const InputDecoration (
                                   hintText: 'Enter origin',
                                   contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                                   border: InputBorder.none,
                                 ),
-                                readOnly: origin != null,
                               ),
                             ),
                         ),
@@ -144,14 +119,11 @@ class _MapRoute extends State<MapRouteInit> {
                                 child: TextFormField(
                                   controller: _searchDestinationController,
                                   textCapitalization: TextCapitalization.words,
-                                  enabled: destination == null,
-                                  initialValue: destination,
                                   decoration: const InputDecoration(
                                     hintText: 'Enter destination',
                                     contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                                     border: InputBorder.none,
                                   ),
-                                  readOnly: destination != null,
                                 ),
                               ),
                             ),
@@ -169,11 +141,11 @@ class _MapRoute extends State<MapRouteInit> {
                                 color: Colors.white,
                               ),
                               onPressed: () async {
-                                if (_searchOriginController?.text != null && _searchDestinationController?.text != null) {
-                                  var directions = await Location().getDirection(_searchOriginController?.text, _searchDestinationController?.text);
-                                  _changeCameraPosition(directions['start_location']['lat'], directions['start_location']['lng'], directions['northeast'], directions['southwest']);
-                                  _setPolyline(directions['polyline_decoded']);
-                                }
+                                origin = _searchOriginController.text;
+                                destination = _searchDestinationController.text;
+                                var directions = await Location().getDirection(_searchOriginController.text, _searchDestinationController.text);
+                                _changeCameraPosition(directions['end_location']['lat'], directions['end_location']['lng'], directions['northeast'], directions['southwest']);
+                                _setPolyline(directions['polyline_decoded']);
                               },
                             ),
                             //   ),
@@ -191,33 +163,19 @@ class _MapRoute extends State<MapRouteInit> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             setState(() {
-              if (isMinus) {
-                // Button is currently in minus state
-                tripUIID = null;
-              } else {
-
-                FirebaseAuth auth = FirebaseAuth.instance;
-                User? user = auth.currentUser;
-
-                if (user != null) {
-                  String uid = user.uid;
-                  print('User UUID: $uid');
-                } else {
-                  print('User is not authenticated.');
+                if (origin != null && destination != null) {
+                  Trip trip = Trip(
+                      '',
+                      origin!,
+                      destination!,
+                      '40kW/h',
+                      '2:30'
+                  );
+                  tripUIID = Firebase().addTrip(trip);
                 }
-
-
-
-
-                // Button is currently in plus state
-                tripUIID = 'hola'; // Replace with your logic
-              }
-              isMinus = !isMinus; // Toggle the state
-            });
+              });
           },
-          child: Icon(
-            isMinus ? Icons.remove : Icons.add, // Use the correct icons
-          ),
+          child: Icon(Icons.add),
           backgroundColor: Color(0xFFFF722D),
         ),
         body: Column (
@@ -317,18 +275,25 @@ class _MapRoute extends State<MapRouteInit> {
     setState(() {
       _polyline = Polyline(
         polylineId: PolylineId("polylineId"),
-        width: 2,
+        width: 3,
         color: Colors.blue,
         points: polylineLatLng,
       );
 
       _markers.clear();
-      for (LatLng markerPosition in markerPositions) {
+      for (int i = 0; i < markerPositions.length; i++) {
+        BitmapDescriptor markerIcon;
+        if (i == 0) {
+          markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
+        } else {
+          markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+        }
+
         _markers.add(
           Marker(
-            markerId: MarkerId(markerPosition.toString()),
-            position: markerPosition,
-            icon: BitmapDescriptor.defaultMarker,
+            markerId: MarkerId(markerPositions[i].toString()),
+            position: markerPositions[i],
+            icon: markerIcon,
           ),
         );
       }
@@ -338,8 +303,8 @@ class _MapRoute extends State<MapRouteInit> {
   Future<void> _handleDirections(String origin, String destination) async {
     var directions = await Location().getDirection(origin, destination);
     _changeCameraPosition(
-      directions['start_location']['lat'],
-      directions['start_location']['lng'],
+      directions['end_location']['lat'],
+      directions['end_location']['lng'],
       directions['northeast'],
       directions['southwest'],
     );

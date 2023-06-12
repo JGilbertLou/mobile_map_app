@@ -1,8 +1,11 @@
+
 import 'package:flutter/material.dart';
 import 'package:untitled4/main.dart';
+import 'package:untitled4/screens/carModel.dart';
 import 'package:untitled4/screens/user.dart';
 import 'package:untitled4/trip.dart';
 import 'package:untitled4/tripsContainer.dart';
+import 'package:untitled4/firebase.dart';
 
 import 'map.dart';
 
@@ -35,19 +38,15 @@ class Homepage extends StatefulWidget {
 
 class HomepageState extends State<Homepage> {
   double carAutonomy;
+  List<Trip> _trips = <Trip>[];
   HomepageState(this.carAutonomy);
 
-  final List<Trip> _trips = [
-    Trip('Barcelona', 'Madrid', '40kW/h', '2:30'),
-    Trip('Milan', 'Venice', '40kW/h', '2:30'),
-    Trip('Zaragoza', 'Seville', '40kW/h', '2:30'),
-    Trip('Washington DC', 'Houston', '40kW/h', '2:30'),
-    Trip('Lyon', 'Oslo', '40kW/h', '2:30'),
-    Trip('Lyon', 'Oslo', '40kW/h', '2:30'),
-    Trip('Lyon', 'Oslo', '40kW/h', '2:30'),
-    Trip('Lyon', 'Oslo', '40kW/h', '2:30'),
-    Trip('Lyon', 'Oslo', '40kW/h', '2:30'),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchTrips();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,27 +92,54 @@ class HomepageState extends State<Homepage> {
                               ),
                             ],
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 24.0),
-                            child: ClipOval(
-                              child: Container(
-                                width: 40, // Set the desired button width
-                                height: 40, // Set the desired button height
-                                color: Colors.white, // Set the desired button color
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.person,
-                                    size: 24, // Set the desired icon size
-                                    color: Colors.black, // Set the desired icon color
+                          Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(right: 16.0),
+                                child: ClipOval(
+                                  child: Container(
+                                    width: 40, // Set the desired button width
+                                    height: 40, // Set the desired button height
+                                    color: Colors.white, // Set the desired button color
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.car_repair,
+                                        size: 24, // Set the desired icon size
+                                        color: Colors.black, // Set the desired icon color
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(context).push(MaterialPageRoute(
+                                          builder: (context) => CarModelScreen(),
+                                        ));
+                                      },
+                                    ),
                                   ),
-                                  onPressed: () {
-                                    Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (context) => UserScreen(),
-                                    ));
-                                  },
                                 ),
                               ),
-                            ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 16.0),
+                                child: ClipOval(
+                                  child: Container(
+                                    width: 40, // Set the desired button width
+                                    height: 40, // Set the desired button height
+                                    color: Colors.white, // Set the desired button color
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.person,
+                                        size: 24, // Set the desired icon size
+                                        color: Colors.black, // Set the desired icon color
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(context).push(MaterialPageRoute(
+                                          builder: (context) => UserScreen(),
+                                        ));
+                                        _fetchTrips();
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -125,7 +151,7 @@ class HomepageState extends State<Homepage> {
                           OutlinedButton(
                             onPressed: () {
                               Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => MapRouteInit(carAutonomy: carAutonomy, origin: "barcelona", destination: 'milan', tripUIID: '2',),
+                                builder: (context) => MapRouteInit(carAutonomy: carAutonomy,),
                               ));
                             },
                             style: ButtonStyle(
@@ -164,12 +190,47 @@ class HomepageState extends State<Homepage> {
       ),
 
 
-      body: ListView.builder(
+      body:  ListView.builder (
         itemCount: _trips.length,
         itemBuilder: (context, index) {
-          return TripContainer(trip: _trips[index],);
+          return Dismissible(
+            key: Key(_trips[index].id),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              color: Colors.red,
+            ),
+            onDismissed: (direction) {
+              setState(() {
+                Firebase().deleteTrip(_trips[index].id);
+                print(_trips[index].id);
+                _trips.removeAt(index);
+              });
+            },
+            child : GestureDetector (
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => MapRouteInit(carAutonomy: carAutonomy, origin: _trips[index].origin, destination: _trips[index].destination, tripUIID: _trips[index].id),
+                ));
+              },
+            child: TripContainer(trip: _trips[index]),
+            ),
+          );
         },
-      )
+      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     setState(() {
+      //       _fetchTrips();
+      //       });
+      //     },
+      //   child: Icon(Icons.refresh),
+      //   backgroundColor: Color(0xFF0C747E),
+      // ),
     );
   }
+
+  void _fetchTrips() async {
+    _trips = await Firebase().getTrips();
+  }
+
 }
